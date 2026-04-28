@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heap Simulator | Max & Min Heap</title>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Segoe UI, sans-serif;
+        }
+
+        :root {
+            --bg: #f4f7ff;
+            --card: #ffffff;
+            --text: #111;
+            --btn: #4f46e5;
+            --btn2: #06b6d4;
+            --line: #888;
+            --node: #ffffff;
+            --stroke: #4f46e5;
+        }
+
+        body.dark {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --btn: #7c3aed;
+            --btn2: #0ea5e9;
+            --line: #94a3b8;
+            --node: #334155;
+            --stroke: #38bdf8;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        .right-top {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            color: white;
+            background: var(--btn);
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .secondary {
+            background: var(--btn2);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            outline: none;
+        }
+
+        svg {
+            width: 100%;
+            height: 520px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 18px;
+        }
+
+        .node {
+            fill: var(--node);
+            stroke: var(--stroke);
+            stroke-width: 3;
+        }
+
+        .node.highlight {
+            fill: #facc15;
+        }
+
+        .node-text {
+            fill: var(--text);
+            font-weight: bold;
+            font-size: 16px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .edge {
+            stroke: var(--line);
+            stroke-width: 2;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        @media(max-width:850px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media(max-width:500px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+        /* Footer Section Styling */
+.custom-footer {
+    margin-top: 40px;
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.developed-by {
+    margin-bottom: 20px;
+}
+
+.developed-by p {
+    font-size: 14px;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+.heart {
+    color: #ff4d4d;
+}
+
+.find-me {
+    margin: 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.social-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.social-buttons a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: 0.3s;
+}
+
+.social-buttons a:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--btn2);
+}
+
+/* Dark mode adjustment for footer if needed */
+body.dark .custom-footer {
+    background: #0f172a;
+    border: 1px solid #334155;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="top">
+            <div>
+                <h1>🌳 Heap Simulator</h1>
+                <p>Max Heap + Min Heap Simulator</p>
+            </div>
+
+            <div class="right-top">
+                <button onclick="toggleTheme()">🌙 Theme</button>
+                <button class="secondary" onclick="toggleHeapType()">🔁 <span id="heapLabel">Max Heap</span></button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="insert-value" placeholder="Enter value">
+
+            <button onclick="insertValue()">Insert</button>
+            <button onclick="extractRoot()">Extract</button>
+            <button onclick="generateRandom()">Generate</button>
+
+            <select id="speed">
+                <option value="500">Normal</option>
+                <option value="250">Fast</option>
+                <option value="100">Ultra Fast</option>
+            </select>
+        </div>
+
+        <svg id="heap-visual"></svg>
+
+        <div class="footer">
+            Press <b>Enter</b> after typing value 🚀
+        </div>
+
+            <!-- New Footer Added Below -->
+    <div class="custom-footer">
+        <div class="developed-by">
+            Developed with <span class="heart">❤️</span> by <b>Rownok</b>
+            <p>Max Heap + Min Heap in One Site</p>
+        </div>
+
+        <div class="find-me">
+            📫 Find Me On
+        </div>
+
+        <div class="social-buttons">
+            <a href="https://www.linkedin.com/in/md-ragib-shariare-rownok-b15b4a402/"><span style="margin-right:8px;">👤</span> Linkedin Profile</a>
+            <a href="https://github.com/ragibshariarerownok"><span style="margin-right:8px;">🖇️</span> Github</a>
+            <a href="https://www.facebook.com/ragibshariarerownok"><span style="margin-right:8px;">🫠</span> Facebook</a>
+        </div>
+    </div>
+    <!-- End of New Footer -->
+
+
+    </div>
+
+    <script>
+        class Heap {
+            constructor(type = "max") {
+                this.heap = [];
+                this.type = type;
+            }
+
+            parent(i) { return Math.floor((i - 1) / 2); }
+            left(i) { return 2 * i + 1; }
+            right(i) { return 2 * i + 2; }
+
+            compare(a, b) {
+                return this.type === "max" ? a > b : a < b;
+            }
+
+            async swap(i, j) {
+                await highlight([i, j]);
+                [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
+                await draw();
+                await sleep(getSpeed());
+            }
+
+            async insert(val) {
+                this.heap.push(val);
+                await this.heapifyUp(this.heap.length - 1);
+            }
+
+            async heapifyUp(i) {
+                while (i > 0 && this.compare(this.heap[i], this.heap[this.parent(i)])) {
+                    await this.swap(i, this.parent(i));
+                    i = this.parent(i);
+                }
+            }
+
+            async extractRoot() {
+                if (this.heap.length === 0) return;
+                if (this.heap.length === 1) {
+                    this.heap.pop();
+                    return;
+                }
+
+                this.heap[0] = this.heap.pop();
+                await this.heapifyDown(0);
+            }
+
+            async heapifyDown(i) {
+                let target = i;
+                let l = this.left(i);
+                let r = this.right(i);
+
+                if (l < this.heap.length && this.compare(this.heap[l], this.heap[target])) target = l;
+                if (r < this.heap.length && this.compare(this.heap[r], this.heap[target])) target = r;
+
+                if (target !== i) {
+                    await this.swap(i, target);
+                    await this.heapifyDown(target);
+                }
+            }
+        }
+
+        let heap = new Heap("max");
+        const svg = d3.select("#heap-visual");
+        const radius = 28;
+
+        function getSpeed() {
+            return Number(document.getElementById("speed").value);
+        }
+
+        function sleep(ms) {
+            return new Promise(r => setTimeout(r, ms));
+        }
+
+        async function highlight(arr) {
+            d3.selectAll(".node").classed("highlight", false);
+            arr.forEach(i => {
+                d3.select("#node-" + i).classed("highlight", true);
+            });
+            await sleep(getSpeed());
+        }
+
+        function pos(index) {
+            const level = Math.floor(Math.log2(index + 1));
+            const p = index - Math.pow(2, level) + 1;
+            const width = Math.pow(2, level);
+            const svgWidth = parseInt(svg.style("width"));
+
+            return {
+                x: (p + 0.8) * (svgWidth / (width + 1)),
+                y: (level + 1) * 85
+            };
+        }
+
+        async function draw() {
+            svg.selectAll("*").remove();
+
+            for (let i = 0; i < heap.heap.length; i++) {
+                let parent = pos(i);
+
+                let l = heap.left(i);
+                let r = heap.right(i);
+
+                if (l < heap.heap.length) {
+                    let child = pos(l);
+                    svg.append("line")
+                        .attr("class", "edge")
+                        .attr("x1", parent.x)
+                        .attr("y1", parent.y)
+                        .attr("x2", child.x)
+                        .attr("y2", child.y);
+                }
+
+                if (r < heap.heap.length) {
+                    let child = pos(r);
+                    svg.append("line")
+                        .attr("class", "edge")
+                        .attr("x1", parent.x)
+                        .attr("y1", parent.y)
+                        .attr("x2", child.x)
+                        .attr("y2", child.y);
+                }
+            }
+
+            for (let i = 0; i < heap.heap.length; i++) {
+                let p = pos(i);
+
+                let g = svg.append("g")
+                    .attr("transform", `translate(${p.x},${p.y})`);
+
+                g.append("circle")
+                    .attr("class", "node")
+                    .attr("r", radius)
+                    .attr("id", "node-" + i);
+
+                g.append("text")
+                    .attr("class", "node-text")
+                    .text(heap.heap[i]);
+            }
+        }
+
+        async function insertValue() {
+            let input = document.getElementById("insert-value");
+            let val = parseInt(input.value);
+
+            if (!isNaN(val)) {
+                await heap.insert(val);
+                await draw();
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        async function extractRoot() {
+            await heap.extractRoot();
+            await draw();
+        }
+
+        async function generateRandom() {
+            heap.heap = [];
+            for (let i = 0; i < 12; i++) {
+                await heap.insert(Math.floor(Math.random() * 100));
+            }
+            await draw();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+        }
+
+        function toggleHeapType() {
+            let values = [...heap.heap];
+
+            heap = new Heap(heap.type === "max" ? "min" : "max");
+
+            document.getElementById("heapLabel").innerText =
+                heap.type === "max" ? "Max Heap" : "Min Heap";
+
+            (async () => {
+                for (let val of values) {
+                    await heap.insert(val);
+                }
+                await draw();
+            })();
+        }
+
+        document.getElementById("insert-value").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                insertValue();
+            }
+        });
+
+        window.addEventListener("resize", draw);
+
+        draw();
+    </script>
+
+</body>
+
+</html>
